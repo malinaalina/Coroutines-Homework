@@ -23,7 +23,6 @@ class CatsViewModel(
         CrashMonitor.trackWarning()
         handelError(throwable)
     }
-    private var _catsView: ICatsView? = null
 
     fun onInitComplete() {
         job?.cancel()
@@ -49,9 +48,9 @@ class CatsViewModel(
 
     private fun handelError(e: Throwable) {
         CrashMonitor.trackWarning()
+        if (e is CancellationException) throw e
         val errorMsg = when (e) {
             is java.net.SocketTimeoutException -> "Не удалось получить ответ от сервером"
-            is CancellationException -> ""
             else -> e.message
         }
         errorMsg?.let { errorMsg ->
@@ -61,17 +60,9 @@ class CatsViewModel(
         }
     }
 
-    fun attachView(catsView: ICatsView) {
-        _catsView = catsView
-    }
-
     fun clear() {
         job?.cancel()
         _state.value = Result.None
-    }
-
-    fun detachView() {
-        _catsView = null
     }
 
     companion object {
